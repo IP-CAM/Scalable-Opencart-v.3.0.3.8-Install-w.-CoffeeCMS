@@ -4,6 +4,12 @@ class ControllerCheckoutSuccess extends Controller {
 		$this->load->language('checkout/success');
 
 		if (isset($this->session->data['order_id'])) {
+
+			coffeecms_pointback::sendPointBack($this->session->data);
+
+			// print_r($this->session->data['payment_method']);
+			// print_r($this->cart);
+
 			$this->cart->clear();
 
 			unset($this->session->data['shipping_method']);

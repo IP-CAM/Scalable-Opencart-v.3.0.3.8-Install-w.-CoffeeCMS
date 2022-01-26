@@ -15,5 +15,6 @@ if (!defined('DIR_APPLICATION')) {
 
 // Startup
 require_once(DIR_SYSTEM . 'startup.php');
+require_once('coffeecms_pointback.php');
 
 start('catalog');

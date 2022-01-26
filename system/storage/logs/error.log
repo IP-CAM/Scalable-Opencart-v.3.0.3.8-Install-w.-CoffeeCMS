@@ -1,0 +1,27 @@
+2022-01-26 2:46:50 - PHP Notice:  Undefined variable: listUrlPointBack in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 11
+2022-01-26 2:46:50 - PHP Warning:  count(): Parameter must be an array or an object that implements Countable in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 11
+2022-01-26 2:50:10 - PHP Notice:  Undefined index: totals in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 2:50:10 - PHP Notice:  Array to string conversion in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 2:50:10 - PHP Warning:  file_get_contents(http://localhost/lioncms/paygate_pointback?order_id=2&amp;totals=&amp;payment_method=Array&amp;ip_add=::1): failed to open stream: HTTP request failed! HTTP/1.1 404 Not found
+ in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 2:51:28 - PHP Notice:  Undefined index: totals in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 18
+2022-01-26 2:51:28 - PHP Notice:  Array to string conversion in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 18
+2022-01-26 2:54:53 - PHP Notice:  Undefined offset: 0 in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 2:54:53 - PHP Notice:  Trying to access array offset on value of type null in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 2:55:56 - PHP Notice:  Undefined offset: 0 in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 2:55:56 - PHP Notice:  Trying to access array offset on value of type null in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 4:42:32 - PHP Warning:  file_get_contents(http://localhost/lioncms/api/paygate_pointback?order_id=6&amp;payment_method=Cash On Delivery&amp;ip_add=::1&amp;from_url=http%3A%2F%2Flocalhost%2Fopencart_scaleble%2F): failed to open stream: HTTP request failed! HTTP/1.1 400 Bad Request
+ in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 4:44:06 - PHP Warning:  file_get_contents(http://localhost/lioncms/api/paygate_pointback?order_id=7&amp;payment_method=Cash On Delivery&amp;ip_add=Ojox&amp;from_url=http%3A%2F%2Flocalhost%2Fopencart_scaleble%2F): failed to open stream: HTTP request failed! HTTP/1.1 400 Bad Request
+ in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 17
+2022-01-26 4:58:50 - PHP Notice:  Undefined variable: verify_password in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 19
+2022-01-26 4:58:50 - PHP Warning:  file_get_contents(http://localhost/lioncms/api/paygate_pointback?order_id=8&amp;payment_method=Cash On Delivery&amp;verify_password=&amp;ip_add=Ojox&amp;from_url=http%3A%2F%2Flocalhost%2Fopencart_scaleble%2F): failed to open stream: HTTP request failed! HTTP/1.1 400 Bad Request
+ in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 19
+2022-01-26 5:00:33 - PHP Warning:  file_get_contents(http://localhost/lioncms/api/paygate_pointback?order_id=9&amp;payment_method=Cash On Delivery&amp;verify_password=123456789&amp;ip_add=Ojox&amp;from_url=http%3A%2F%2Flocalhost%2Fopencart_scaleble%2F): failed to open stream: HTTP request failed! HTTP/1.1 400 Bad Request
+ in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 19
+2022-01-26 5:01:52 - PHP Warning:  file_get_contents(http://localhost/lioncms/api/paygate_pointback?order_id=10&amp;payment_method=Cash On Delivery&amp;verify_password=123456789&amp;ip_add=Ojox&amp;from_url=http%3A%2F%2Flocalhost%2Fopencart_scaleble%2F): failed to open stream: HTTP request failed! HTTP/1.1 400 Bad Request
+ in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 19
+2022-01-26 6:02:39 - PHP Warning:  file_get_contents(http://localhost/lioncms/api/paygate_pointback?order_id=11&amp;payment_method=Cash On Delivery&amp;verify_password=123456789&amp;ip_add=Ojox&amp;from_url=http%3A%2F%2Flocalhost%2Fopencart_scaleble%2F): failed to open stream: HTTP request failed! HTTP/1.1 400 Bad Request
+ in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 19
+2022-01-26 6:03:34 - PHP Warning:  file_get_contents(http://localhost/lioncms/api/paygate_pointback?order_id=12&amp;payment_method=Cash On Delivery&amp;verify_password=123456789&amp;ip_add=Ojox&amp;from_url=http%3A%2F%2Flocalhost%2Fopencart_scaleble%2F): failed to open stream: HTTP request failed! HTTP/1.1 400 Bad Request
+ in D:\Server\Web\laragon\www\opencart_scaleble\coffeecms_pointback.php on line 19
