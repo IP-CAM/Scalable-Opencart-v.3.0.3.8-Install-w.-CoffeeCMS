@@ -62,7 +62,7 @@ class CoffeeCMS_ResAPI
         $queryStr='';
         $queryStr.="select a.total,a.order_id,a.payment_method,a.ip,a.order_status_id,b.name as status_name";
         $queryStr.=" from oc_order as a left join oc_order_status as b ON a.order_status_id=b.order_status_id";
-        $queryStr.="  where a.order_id='".$order_id."' ";
+        $queryStr.="  where a.order_id='".$order_id."' AND a.order_status_id IN ('2','1','5','15') ";
 
         $loadOrderData=self::query($queryStr);
 
