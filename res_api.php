@@ -6,6 +6,7 @@ if (is_file('config.php')) {
 	require_once('config.php');
 }
 
+require_once('coffeecms_pointback.php');
 
 class CoffeeCMS_ResAPI
 {
@@ -94,6 +95,100 @@ class CoffeeCMS_ResAPI
         // throw new Exception("Error Processing Request", 1);
         
     }
+
+    public function get_list_product()
+    {
+        $category_id=isset($_REQUEST['category_id'])?$_REQUEST['category_id']:'';
+        $limit=isset($_REQUEST['limit'])?$_REQUEST['limit']:'12';
+        $page_no=isset($_REQUEST['page_no'])?$_REQUEST['page_no']:'1';
+
+        if((int)$page_no > 0)
+        {
+            $page_no=(int)$page_no-1;
+        }
+        if((int)$page_no<=0)
+        {
+            $page_no=0;
+        }
+
+        $offset=(int)$page_no*12;
+
+        
+        self::setPrefix(false);
+        self::connect();
+
+        $queryStr='';
+		$queryStr=" select a.product_id,a.image,a.price,b.category_id,c.name as category_name,prod.name as product_title";
+		$queryStr.=" from oc_product as a";
+		$queryStr.=" left join oc_product_description as prod ON a.product_id=prod.product_id";
+		$queryStr.=" left join oc_product_to_category as b ON a.product_id=b.product_id";
+		$queryStr.=" left join oc_category_description as c ON b.category_id=c.category_id";
+		$queryStr.=" where a.status='1'";
+
+		if(strlen($category_id) > 0)
+		{
+			$queryStr.=" AND b.category_id='".$category_id."' ";
+		}
+		
+		$queryStr.=" order by a.date_added desc limit ".$page_no.",".$limit;
+		
+        $loadData=self::query($queryStr);
+
+        return $loadData;
+    }
+
+    public function get_list_category()
+    {
+        
+        self::setPrefix(false);
+        self::connect();
+
+		$result=[];
+
+        $queryStr='';
+		$queryStr=" SELECT a.*,b.name,b.description";
+		$queryStr.=" FROM oc_category as a";
+		$queryStr.=" left join oc_category_description as b ON a.category_id=b.category_id";
+		$queryStr.=" where a.status='1' and parent_id='0'";
+		$queryStr.=" order by a.sort_order asc";
+		
+        $topData=self::query($queryStr);
+
+        $queryStr='';
+		$queryStr=" SELECT a.*,b.name,b.description";
+		$queryStr.=" FROM oc_category as a";
+		$queryStr.=" left join oc_category_description as b ON a.category_id=b.category_id";
+		$queryStr.=" where a.status='1' and parent_id<>'0'";
+		$queryStr.=" order by a.parent_id,a.sort_order asc";
+		
+        $subData=self::query($queryStr);
+
+		$total=count($topData);
+		$totalSub=count($subData);
+
+		for ($i=0; $i < $total; $i++) { 
+
+			array_push($result,$topData[$i]);
+			
+			for ($j=0; $j < $totalSub; $j++) { 
+				if($topData[$i]['category_id']==$subData[$j]['parent_id'])
+				{
+					array_push($result,$subData[$j]);
+				}
+
+				// for ($k=0; $k < $totalSub; $k++) { 
+				// 	if($subData[$j]['category_id']==$subData[$k]['parent_id'])
+				// 	{
+				// 		array_push($result,$subData[$k]);
+				// 	}
+				// }
+			}
+		}
+
+        return $result;
+    }
+
+
 
 
 	public $db = array(
