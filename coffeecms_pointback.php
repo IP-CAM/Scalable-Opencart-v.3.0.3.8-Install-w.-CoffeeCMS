@@ -2,7 +2,7 @@
 
 class coffeecms_pointback
 {
-    public static $verify_password='123456789';
+    public static $verify_password='1234567890';
 
     // Your coffee cms 'paygate_pointback' api url
     public static $listUrlPointBack=[

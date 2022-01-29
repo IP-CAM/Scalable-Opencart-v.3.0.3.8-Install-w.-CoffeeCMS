@@ -211,6 +211,42 @@ class CoffeeCMS_ResAPI
         return $loadData;
     }
 
+	public function change_verify_password()
+	{
+        $verify_password=isset($_POST['verify_password'])?trim($_POST['verify_password']):'';
+        $new_password=isset($_POST['new_password'])?trim($_POST['new_password']):'';
+
+		$result_resonse=[];
+		$result_resonse['error']='no';
+		$result_resonse['data']='';
+
+		if($verify_password!=coffeecms_pointback::$verify_password)
+		{
+			$result_resonse['error']='yes';
+			$result_resonse['data']='Verify password not valid.';
+		}
+		else
+		{
+			$urlData=parse_url($_SERVER['HTTP_REFERER']);
+
+			$fileData=file_get_contents('coffeecms_pointback.php');
+
+			$fileData=str_replace("'".$verify_password."'","'".$new_password."'",$fileData);
+
+			// $fileData=str_replace("http://site.com",$urlData['scheme']."://".$urlData['host'],$fileData);
+
+			$fp = fopen('coffeecms_pointback.php', 'w');
+			fwrite($fp, $fileData);
+			fclose($fp);	
+			
+			$result_resonse['data']='Change verify password successfull.';
+
+		}
+
+		echo json_encode($result_resonse);die();	
+
+	}
+
     public function insert_new_product()
     {
         $user_id=isset($_POST['user_id'])?$_POST['user_id']:'';
@@ -230,6 +266,11 @@ class CoffeeCMS_ResAPI
 		$result_resonse=[];
 		$result_resonse['error']='no';
 		$result_resonse['data']='';
+
+		if(strlen($user_id)==0)
+		{
+			$user_id='11015035';
+		}
 
 		if($verify_password!=coffeecms_pointback::$verify_password)
 		{
