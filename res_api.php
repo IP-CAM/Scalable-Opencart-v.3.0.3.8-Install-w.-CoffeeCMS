@@ -16,7 +16,7 @@ class CoffeeCMS_ResAPI
 	public $error = '';
 	public $is_cache = false;
 	public $is_prefix = true;
-	public $insert_id = '';
+	public static $insert_id = '';
 
 	// Seconds
 	public $cache_time = 60;
@@ -96,11 +96,74 @@ class CoffeeCMS_ResAPI
         
     }
 
+    public function get_list_order()
+    {
+        $category_id=isset($_REQUEST['category_id'])?$_REQUEST['category_id']:'';
+        $user_id=isset($_REQUEST['user_id'])?$_REQUEST['user_id']:'';
+        $limit=isset($_REQUEST['limit'])?$_REQUEST['limit']:'15';
+        $page_no=isset($_REQUEST['page_no'])?$_REQUEST['page_no']:'1';
+        $verify_password=isset($_REQUEST['verify_password'])?$_REQUEST['verify_password']:'';
+
+		$result_resonse=[];
+		$result_resonse['error']='no';
+		$result_resonse['data']='';
+
+		
+		// if($verify_password!=coffeecms_pointback::$verify_password)
+		// {
+		// 	$result_resonse['error']='yes';
+		// 	$result_resonse['data']='Verify password not valid.';
+		// }
+
+        if((int)$page_no > 0)
+        {
+            $page_no=(int)$page_no-1;
+        }
+        if((int)$page_no<=0)
+        {
+            $page_no=0;
+        }
+
+        $offset=(int)$page_no*15;
+
+        
+        self::setPrefix(false);
+        self::connect();
+
+        $queryStr='';
+		$queryStr=" select a.*,b.date_added";
+		$queryStr.=" from oc_order_product as a";
+		$queryStr.=" left join oc_order as b ON a.order_id=b.order_id ";
+		// $queryStr.=" left join oc_product_to_category as d ON a.product_id=d.product_id";
+		// $queryStr.=" left join oc_category_description as c ON b.category_id=c.category_id";
+		$queryStr.=" left join (SELECT product_id,count(*) as total FROM oc_order_product where order_id IN (select order_id from oc_order where order_status_id IN ('2','5','1','15')) group by product_id) as d ON a.product_id=d.product_id ";
+		$queryStr.=" where a.order_id<>'' ";
+
+		if(strlen($user_id) > 0)
+		{
+			$queryStr.=" AND a.product_id IN (select product_id from oc_product where model='".$user_id."' ) ";
+		}
+		if(strlen($category_id) > 0)
+		{
+			$queryStr.=" AND a.product_id IN (select product_id from oc_product_to_category where category_id='".$category_id."' ) ";
+		}
+
+		$queryStr.=" order by b.date_added limit ".$page_no.",".$limit;
+		
+        $result_resonse['data']=self::query($queryStr);
+
+        return json_encode($result_resonse);
+    }
+
     public function get_list_product()
     {
         $category_id=isset($_REQUEST['category_id'])?$_REQUEST['category_id']:'';
+        $user_id=isset($_REQUEST['user_id'])?$_REQUEST['user_id']:'';
+        $keywords=isset($_REQUEST['keywords'])?$_REQUEST['keywords']:'';
         $limit=isset($_REQUEST['limit'])?$_REQUEST['limit']:'12';
         $page_no=isset($_REQUEST['page_no'])?$_REQUEST['page_no']:'1';
+        $order_by=isset($_REQUEST['order_by'])?$_REQUEST['order_by']:'date_added';
+        $order_type=isset($_REQUEST['order_type'])?$_REQUEST['order_type']:'desc';
 
         if((int)$page_no > 0)
         {
@@ -118,23 +181,173 @@ class CoffeeCMS_ResAPI
         self::connect();
 
         $queryStr='';
-		$queryStr=" select a.product_id,a.image,a.price,b.category_id,c.name as category_name,prod.name as product_title";
+		$queryStr=" select a.product_id,a.image,a.price,b.category_id,c.name as category_name,prod.name as product_title,d.total_order";
 		$queryStr.=" from oc_product as a";
 		$queryStr.=" left join oc_product_description as prod ON a.product_id=prod.product_id";
 		$queryStr.=" left join oc_product_to_category as b ON a.product_id=b.product_id";
 		$queryStr.=" left join oc_category_description as c ON b.category_id=c.category_id";
+		$queryStr.=" left join (SELECT product_id,count(*) as total_order FROM oc_order_product where order_id IN (select order_id from oc_order where order_status_id IN ('2','5','1','15')) group by product_id) as d ON a.product_id=d.product_id ";
 		$queryStr.=" where a.status='1'";
 
 		if(strlen($category_id) > 0)
 		{
 			$queryStr.=" AND b.category_id='".$category_id."' ";
 		}
+
+		if(strlen($keywords) > 0)
+		{
+			$queryStr.=" AND (b.name LIKE'%".$keywords."%' OR b.tag LIKE'%".$keywords."%') ";
+		}
+
+		if(strlen($user_id) > 0)
+		{
+			$queryStr.=" AND a.model='".$user_id."' ";
+		}
 		
-		$queryStr.=" order by a.date_added desc limit ".$page_no.",".$limit;
+		$queryStr.=" order by a.".$order_by." ".$order_type." limit ".$page_no.",".$limit;
 		
         $loadData=self::query($queryStr);
 
         return $loadData;
+    }
+
+    public function insert_new_product()
+    {
+        $user_id=isset($_POST['user_id'])?$_POST['user_id']:'';
+        $title=isset($_POST['title'])?trim(addslashes(strip_tags($_POST['title']))):'';
+        $quantity=isset($_POST['quantity'])?trim($_POST['quantity']):'1000';
+        $image=isset($_POST['image'])?addslashes(trim($_POST['image'])):'';
+        $price=isset($_POST['price'])?addslashes(trim($_POST['price'])):'';
+        $points=isset($_POST['points'])?addslashes(trim($_POST['points'])):'0';
+        $descriptions=isset($_POST['descriptions'])?trim(addslashes(strip_tags($_POST['descriptions']))):'';
+        $category_id=isset($_POST['category_id'])?trim($_POST['category_id']):'';
+        $download_file=isset($_POST['download_file'])?trim($_POST['download_file']):'';
+        $shipping=isset($_POST['shipping'])?trim($_POST['shipping']):'0';
+        $tags=isset($_POST['tags'])?trim($_POST['tags']):'';
+
+        $verify_password=isset($_POST['verify_password'])?trim($_POST['verify_password']):'';
+
+		$result_resonse=[];
+		$result_resonse['error']='no';
+		$result_resonse['data']='';
+
+		if($verify_password!=coffeecms_pointback::$verify_password)
+		{
+			$result_resonse['error']='yes';
+			$result_resonse['data']='Verify password not valid.';
+		}
+
+		// $saveImagePath=DIR_IMAGE.randNumber(9).basename($image);
+		$saveImagePath=DIR_IMAGE;
+
+		// $saveDownloadFilePath=DIR_IMAGE.randNumber(9).basename($download_file);
+		$saveDownloadFilePath=DIR_DOWNLOAD;
+
+		if(isset($image[5]))
+		{
+			$output_filename = self::randAlpha(6).'_'.basename($image);
+
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $image);
+			curl_setopt($ch, CURLOPT_VERBOSE, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_AUTOREFERER, false);
+			curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
+			$result = curl_exec($ch);
+			curl_close($ch);
+		  
+			// the following lines write the contents to a file in the same directory (provided permissions etc)
+			$fp = fopen($saveImagePath.$output_filename, 'w');
+			fwrite($fp, $result);
+			fclose($fp);	
+			
+			$saveImagePath=$output_filename;
+		}
+
+		if(isset($download_file[5]))
+		{
+			$output_filename = self::randAlpha(6).'_'.basename($download_file);
+
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $download_file);
+			curl_setopt($ch, CURLOPT_VERBOSE, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_AUTOREFERER, false);
+			curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
+			$result = curl_exec($ch);
+			curl_close($ch);
+		  
+			// the following lines write the contents to a file in the same directory (provided permissions etc)
+			$fp = fopen($saveDownloadFilePath.$output_filename, 'w');
+			fwrite($fp, $result);
+			fclose($fp);			
+			$saveDownloadFilePath=$output_filename;
+		}
+
+        self::setPrefix(false);
+        self::connect();
+
+        $queryStr='';
+		$queryStr.=" insert into oc_product(model,quantity,sku,upc,ean,jan,isbn,mpn,";
+		$queryStr.="stock_status_id,image,location,manufacturer_id,shipping,price,points,tax_class_id,date_available,";
+		$queryStr.="status,date_added,date_modified)";
+		$queryStr.="VALUES('".$user_id."','9000','','','','','','',";
+		$queryStr.="'7','".$saveImagePath."','',manufacturer_id,'".$shipping."','".$price."','".$points."',tax_class_id,'".date('Y-m-d')."',";
+		$queryStr.="'1','".date('Y-m-d H:i:s')."','".date('Y-m-d H:i:s')."');";
+
+        self::nonquery($queryStr);
+
+		$product_id=self::$insert_id;
+
+		// print_r($product_id);die();
+
+		$result_resonse['data']=$product_id;
+
+        $queryStr='';
+		$queryStr.=" insert into oc_product_description(product_id,language_id,name,description,tag,meta_title,meta_description,meta_keyword)";
+		$queryStr.="VALUES('".$product_id."','1','".$title."','".$descriptions."','".$tags."','".$title."','".$descriptions."','');";
+
+		self::nonquery($queryStr);
+
+		$queryStr='';
+		$queryStr.=" insert into oc_product_image(product_id,image,sort_order)";
+		$queryStr.="VALUES('".$product_id."','".$saveImagePath."','0');";
+
+		self::nonquery($queryStr);
+
+		$queryStr='';
+		$queryStr.=" insert into oc_product_to_category(product_id,category_id)";
+		$queryStr.="VALUES('".$product_id."','".$category_id."');";
+
+		self::nonquery($queryStr);
+
+		if(isset($download_file[5]))
+		{
+			$queryStr='';
+			$queryStr.=" insert into oc_download(filename,mask,date_added)";
+			$queryStr.="VALUES('".$saveDownloadFilePath."','".basename($download_file)."','".date('Y-m-d H:i:s')."');";
+
+			self::nonquery($queryStr);
+
+			$download_id=self::$insert_id;
+
+			$queryStr='';
+			$queryStr.=" insert into oc_download_description(download_id,language_id,name)";
+			$queryStr.="VALUES('".$download_id."','1','".basename($download_file)."');";
+
+			self::nonquery($queryStr);
+
+			$queryStr='';
+			$queryStr.=" insert into oc_product_to_download(product_id,download_id)";
+			$queryStr.="VALUES('".$product_id."','".$download_id."');";
+
+			self::nonquery($queryStr);
+
+		}
+
+        echo json_encode($result_resonse);die();
     }
 
     public function get_list_category()
@@ -188,7 +401,25 @@ class CoffeeCMS_ResAPI
         return $result;
     }
 
-
+	public function randNumber($len = 10)
+	{
+		$str = '012010123456789234560123450123456789234560123456789789345012345601234567892345601234567897893450123456678978934501234567896789';
+	
+		$str = substr(str_shuffle($str), 0, $len);
+	
+		return $str;
+	
+	}
+	
+	public function randAlpha($len = 10)
+	{
+		$str = 'abcdefghijklmnopfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUqrstufghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	
+		$str = substr(str_shuffle($str), 0, $len);
+	
+		return $str;
+	
+	}
 
 
 	public $db = array(
@@ -376,7 +607,7 @@ class CoffeeCMS_ResAPI
 			die($this->dbConnect->error . " - Query: " . $queryStr);
 		}
 
-		$this->insert_id=$this->dbConnect->insert_id;
+		self::$insert_id=$this->dbConnect->insert_id;
 
 		mysqli_close($this->dbConnect);
 
